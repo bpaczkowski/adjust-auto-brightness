@@ -58,6 +58,11 @@ public class BrightnessService extends IntentService {
 
         // sometimes it needs to be set with a different value first for it to become effective
         Settings.System.putInt(getContentResolver(), brightnessAdjSettingsKey, brightnessAdj - 1);
+
+        try {
+            Thread.sleep(50);
+        } catch (InterruptedException ignore) { }
+
         Settings.System.putInt(getContentResolver(), brightnessAdjSettingsKey, brightnessAdj);
     }
 
