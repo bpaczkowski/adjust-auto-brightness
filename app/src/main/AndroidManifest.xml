@@ -24,6 +24,8 @@
 
         <service android:name=".ScreenOnService" />
 
+        <service android:name=".BrightnessSetterService" />
+
         <receiver android:enabled="true" android:name=".BootCompletedReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />

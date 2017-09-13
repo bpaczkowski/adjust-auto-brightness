@@ -7,21 +7,21 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 
 public class ScreenOnService extends Service {
-    private PhoneUnlockedReceiver phoneUnlockedReceiver = new PhoneUnlockedReceiver();
+    private ScreenStateReceiver screenStateReceiver = new ScreenStateReceiver();
 
     @Override
     public void onCreate() {
-        MainApplication.getContext().registerReceiver(phoneUnlockedReceiver, new IntentFilter(Intent.ACTION_SCREEN_ON));
+        IntentFilter intentFilter = new IntentFilter();
+
+        intentFilter.addAction(Intent.ACTION_SCREEN_ON);
+        intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
+
+        MainApplication.getContext().registerReceiver(screenStateReceiver, intentFilter);
     }
 
     @Override
     public void onDestroy() {
-        MainApplication.getContext().unregisterReceiver(phoneUnlockedReceiver);
-    }
-
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        return Service.START_STICKY;
+        MainApplication.getContext().unregisterReceiver(screenStateReceiver);
     }
 
     @Nullable
