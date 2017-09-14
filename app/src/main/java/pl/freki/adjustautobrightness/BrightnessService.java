@@ -1,6 +1,7 @@
 package pl.freki.adjustautobrightness;
 
 import android.app.IntentService;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -26,14 +27,14 @@ public class BrightnessService extends IntentService {
         String action = intent.getAction();
 
         if (action.equals(setAndSaveBrightnessAdjAction)) {
-            int brightnessAdjPercentage = intent.getIntExtra(brightnessAdjIntentKey, 0);
+            int brightnessAdj = intent.getIntExtra(brightnessAdjIntentKey, 0);
 
-            saveBrightnessAdjPercentageValue(brightnessAdjPercentage);
-            setBrightnessAdjPercentage();
+            saveBrightnessAdjValue(brightnessAdj);
+            setBrightnessAdj();
         }
 
         if (action.equals(setBrightnessAdjAction)) {
-            setBrightnessAdjPercentage();
+            setBrightnessAdj();
         }
     }
 
@@ -46,24 +47,34 @@ public class BrightnessService extends IntentService {
         context.startService(intent);
     }
 
-    private void saveBrightnessAdjPercentageValue(int brightnessAdj) {
+    private void saveBrightnessAdjValue(int brightnessAdj) {
         SharedPreferences.Editor editor = preferences.edit();
 
         editor.putInt(brightnessAdjPrefKey, brightnessAdj);
         editor.apply();
     }
 
-    private void setBrightnessAdjPercentage() {
+    private void setBrightnessAdj() {
+        ContentResolver contentResolver = getContentResolver();
         int brightnessAdj = preferences.getInt(brightnessAdjPrefKey, 0);
-
-        // sometimes it needs to be set with a different value first for it to become effective
-        Settings.System.putInt(getContentResolver(), brightnessAdjSettingsKey, brightnessAdj - 1);
+        int currentBrightness;
 
         try {
-            Thread.sleep(50);
-        } catch (InterruptedException ignore) { }
+            currentBrightness = Settings.System.getInt(contentResolver, Settings.System.SCREEN_BRIGHTNESS);
+        } catch (Settings.SettingNotFoundException e) {
+            return;
+        }
 
-        Settings.System.putInt(getContentResolver(), brightnessAdjSettingsKey, brightnessAdj);
+        if (currentBrightness < brightnessAdj) {
+            // sometimes it needs to be set with a different value first for it to become effective
+            Settings.System.putInt(getContentResolver(), brightnessAdjSettingsKey, brightnessAdj - 1);
+
+            try {
+                Thread.sleep(50);
+            } catch (InterruptedException ignore) { }
+
+            Settings.System.putInt(getContentResolver(), brightnessAdjSettingsKey, brightnessAdj);
+        }
     }
 
 }
