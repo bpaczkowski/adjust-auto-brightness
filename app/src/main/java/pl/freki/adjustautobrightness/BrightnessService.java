@@ -65,16 +65,16 @@ public class BrightnessService extends IntentService {
             return;
         }
 
-        if (currentBrightness < brightnessAdj) {
-            // sometimes it needs to be set with a different value first for it to become effective
-            Settings.System.putInt(getContentResolver(), brightnessAdjSettingsKey, brightnessAdj - 1);
+        int brightnessToSet = Math.min(currentBrightness + brightnessAdj, 255);
 
-            try {
-                Thread.sleep(50);
-            } catch (InterruptedException ignore) { }
+        // sometimes it needs to be set with a different value first for it to become effective
+        Settings.System.putInt(getContentResolver(), brightnessAdjSettingsKey, brightnessToSet - 1);
 
-            Settings.System.putInt(getContentResolver(), brightnessAdjSettingsKey, brightnessAdj);
-        }
+        try {
+            Thread.sleep(50);
+        } catch (InterruptedException ignore) { }
+
+        Settings.System.putInt(getContentResolver(), brightnessAdjSettingsKey, brightnessToSet);
     }
 
 }
